@@ -1,9 +1,11 @@
 import React, {useState, useEffect} from 'react'
+import {BsFillQuestionCircleFill} from 'react-icons/bs'
+import Swal from 'sweetalert2'
 
 export const Memo = () => {
 
 
-    const symbols = [1,2,3,4,5,6]
+    const symbols = ["Uno", "Dos","Tres", "Cuatro", "Cinco", "Seis"]
 
     // Definimos los estados iniciales de las cartas
 
@@ -13,16 +15,32 @@ export const Memo = () => {
 
     const [matchedCards, setMatchedCards] = useState([])
 
-    useEffect(() =>{
+    // useEffect(() =>{
+    //     // Generamos las cartas duplicando los símbolos y asignándoles un id
+    //     const generatedCards = symbols.concat(symbols).map((symbol, index) =>({
+    //         id: index,
+    //         symbol: symbol,
+    //         isFlipped: false, //Todas las cartas estan boca abajo al principio
+    //         isMatched: false //Ninguna carta está emperejada al principio
+    //     }))
+        
+    //     setCards(generatedCards) //Guardamos cartas en el estado
+    // }, [])
+    useEffect(() => {
         // Generamos las cartas duplicando los símbolos y asignándoles un id
+        
         const generatedCards = symbols.concat(symbols).map((symbol, index) =>({
-            id: index,
-            symbol: symbol,
-            isFlipped: false, //Todas las cartas estan boca abajo al principio
-            isMatched: false //Ninguna carta está emperejada al principio
-        }))
-        setCards(generatedCards) //Guardamos cartas en el estado
-    }, [])
+                    id: index,
+                    symbol: symbol,
+                    isFlipped: false, //Todas las cartas estan boca abajo al principio
+                    isMatched: false //Ninguna carta está emperejada al principio
+                }))
+    
+        // Orden aleatorio de las cartas
+        const shuffledCards = generatedCards.sort(() => Math.random() - 0.5);
+    
+        setCards(shuffledCards);
+      }, []);
 
     const handleCardClick = (card) =>{
 
@@ -50,14 +68,17 @@ export const Memo = () => {
         const updatedCards = cards.map ((card) =>{
             if ( card.id === firstCard.id || card.id === secondCard.id){
                 return {...card, isFlipped: true} //Volteamos las cartas que coinciden
+            } else{
+                return {...card, isFlipped: false}
             }
-            return card
         })
 
-        //si las dos cartas volteadas tienen el mismo símbolo, las emperejamos
+        //Si las dos cartas volteadas tienen el mismo símbolo, las emperejamos
         if (firstCard.symbol === secondCard.symbol){
             setMatchedCards([...matchedCards, firstCard.id, secondCard.id])
         }
+        
+          
 
         //Limpiamos las cartas volteadas en el estado
         setFlippedCards([])
@@ -65,14 +86,16 @@ export const Memo = () => {
         //Si todas las cartas están enparejadas, mostramos un mensaje de victoria
         if(matchedCards.length + 2 === cards.length){
             setTimeout(() =>{
-                // Swal.fire({
-                //     icon: 'success',
-                //     title: '¡Felicitaciones, lo lograste!',
-                //     showConfirmButton: false,
-                //   })
-                alert("Has ganado!")
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Felicitaciones, lo lograste!',
+                    showConfirmButton: false,
+                  })
+                
             }, 1000)
         }
+       
+          
         // Actualizamos las cartas en el estado
         setCards(updatedCards)
 
@@ -81,20 +104,23 @@ export const Memo = () => {
     //Renderizamos una carta
     const renderCard = (card) =>{
         //Determinamos si la cart está volteada o emparejada
-        // const isFlipped = card.isFlipped || matchedCards.includes(card.id)
-        const isFlipped = card.isFlipped || matchedCards.includes(card.id) || flippedCards.includes(card);
 
-        const cardClass = `card ${isFlipped ? 'flipped' : ''}`
+        const isFlipped = card.isFlipped || matchedCards.includes(card.id) || flippedCards.includes(card.id)
+        const cardClass = `card${isFlipped ? 'flipped' : ''}`
 
 
         return (
             <div className={cardClass} key={card.id} onClick={() => handleCardClick(card)}>
                 <div className='card-inner'>
-                    <div className='card-front'>
-                    </div>
-                    <div className='card-back'>
-                        {card.symbol}
-                    </div>
+                    
+                    {
+                        isFlipped ?
+                        <div>{card.symbol}</div>
+                        :
+                        <div>
+                            <BsFillQuestionCircleFill/>
+                        </div>
+                    }
                 </div>
             </div>
         )
@@ -112,90 +138,5 @@ export const Memo = () => {
   )
 }
 
-// import React, { useState, useEffect } from 'react';
 
-// export const Memo = () => {
-//   const symbols = [1, 2,3,4,5];
-
-//   const [cards, setCards] = useState([]);
-//   const [flippedCards, setFlippedCards] = useState([]);
-//   const [matchedCards, setMatchedCards] = useState([]);
-
-//   useEffect(() => {
-//     const generatedCards = symbols.concat(symbols).map((symbol, index) => ({
-//       id: index,
-//       symbol: symbol,
-//       isFlipped: false,
-//       isMatched: false,
-//     }));
-//     setCards(generatedCards);
-//   }, []);
-
-//   const handleCardClick = (card) => {
-//     if (card.isFlipped || card.isMatched) return;
-
-//     const newFlippedCards = [...flippedCards, card];
-//     setFlippedCards(newFlippedCards);
-
-//     if (newFlippedCards.length === 2) {
-//       setTimeout(() => {
-//         checkForMatch(newFlippedCards);
-//       }, 1000);
-//     }
-//   };
-
-//   const checkForMatch = (flippedCards) => {
-//     const [firstCard, secondCard] = flippedCards;
-
-//     const updatedCards = cards.map((card) => {
-//       if (card.id === firstCard.id || card.id === secondCard.id) {
-//         return { ...card, isFlipped: true };
-//       }
-//       return card;
-//     });
-
-//     setCards(updatedCards);
-
-//     if (firstCard.symbol === secondCard.symbol) {
-//       setMatchedCards((prevMatchedCards) => [
-//         ...prevMatchedCards,
-//         firstCard.id,
-//         secondCard.id,
-//       ]);
-//     }
-
-//     setFlippedCards([]);
-
-//     setTimeout(() => {
-//       const totalMatchedCards = matchedCards.length + 2;
-//       if (totalMatchedCards === cards.length) {
-//         alert('¡Felicitaciones, lo lograste!');
-//       }
-//     }, 1000);
-//   };
-
-//   const renderCard = (card) => {
-//     const isFlipped = card.isFlipped || matchedCards.includes(card.id);
-//     const cardClass = `card ${isFlipped ? 'flipped' : ''}`;
-
-//     return (
-//       <div
-//         className={cardClass}
-//         key={card.id}
-//         onClick={() => handleCardClick(card)}
-//       >
-//         <div className="card-inner">
-//           <div className="card-front"></div>
-//           <div className="card-back">{card.symbol}</div>
-//         </div>
-//       </div>
-//     );
-//   };
-
-//   return (
-//     <div className="memotest">
-//       <div className="board">{cards.map((card) => renderCard(card))}</div>
-//     </div>
-//   );
-// };
 
